@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TabVault Settings</title>
+<link rel="stylesheet" href="options.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="page-head">
+      <img src="icons/icon48.png" width="32" height="32" alt="" />
+      <div>
+        <h1>TabVault Settings</h1>
+        <p class="muted">A lightweight link &amp; tab saver, tuned for low-end machines.</p>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Appearance</h2>
+      <div class="row">
+        <label for="theme">Theme</label>
+        <select id="theme">
+          <option value="system">Match system</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Behavior</h2>
+      <div class="row">
+        <label for="openTarget">Opening a saved link</label>
+        <select id="openTarget">
+          <option value="current">Replaces the current tab</option>
+          <option value="new-tab">Opens in a new tab</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="defaultFolder">Default folder for new saves</label>
+        <select id="defaultFolder">
+          <option value="">No folder</option>
+        </select>
+      </div>
+      <p class="hint">Tip: set keyboard shortcuts for quick-saving at
+        <button id="openShortcuts" class="link-btn" type="button">chrome://extensions/shortcuts</button>.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Folders</h2>
+      <div id="folderList" class="folder-list"></div>
+      <div class="row">
+        <input id="newFolderInput" type="text" placeholder="New folder name" />
+        <button id="addFolderBtn" class="btn btn-primary">Add folder</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Backup &amp; restore</h2>
+      <p class="hint">Everything is stored locally in your browser. Export a backup now and then, especially before reinstalling Chrome or switching machines.</p>
+      <div class="row">
+        <button id="exportBtn" class="btn btn-primary">Export backup (.json)</button>
+        <label class="btn btn-ghost file-label">
+          Import backup…
+          <input id="importInput" type="file" accept="application/json" hidden />
+        </label>
+      </div>
+      <div class="row" id="importModeRow" hidden>
+        <label class="checkbox-inline">
+          <input id="importReplace" type="checkbox" />
+          Replace everything instead of merging
+        </label>
+        <button id="importConfirmBtn" class="btn btn-primary">Import now</button>
+        <button id="importCancelBtn" class="btn btn-ghost">Cancel</button>
+      </div>
+    </section>
+
+    <section class="card danger">
+      <h2>Danger zone</h2>
+      <p class="hint">This permanently deletes every saved item and folder. It cannot be undone — export a backup first.</p>
+      <button id="clearAllBtn" class="btn btn-danger">Clear all TabVault data</button>
+    </section>
+
+    <footer class="page-foot">
+      <span id="itemCount" class="muted"></span>
+      <span class="muted">TabVault v1.0.0</span>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="storage.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "TabVault – Lite Link & Tab Saver",
+  "version": "1.0.0",
+  "description": "Save links, tabs and whole browsing sessions with a name and a note, then close the tabs to free up RAM. Built to be fast on low-end PCs and small screens.",
+  "minimum_chrome_version": "102",
+  "permissions": ["storage", "tabs", "contextMenus", "notifications", "favicon"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "TabVault",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "options.html",
+  "commands": {
+    "save-current-tab": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S",
+        "mac": "Command+Shift+S"
+      },
+      "description": "Save the current tab to TabVault"
+    },
+    "save-current-tab-and-close": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+X",
+        "mac": "Command+Shift+X"
+      },
+      "description": "Save the current tab and close it"
+    }
+  }
+}

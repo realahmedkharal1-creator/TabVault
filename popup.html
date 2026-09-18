@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TabVault</title>
+<link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img src="icons/icon32.png" alt="" width="20" height="20" />
+        <span>TabVault</span>
+      </div>
+      <div class="topbar-actions">
+        <button id="btnTheme" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">🌓</button>
+        <button id="btnSettings" class="icon-btn" title="Settings" aria-label="Settings">⚙️</button>
+      </div>
+    </header>
+
+    <div class="hero-stats" id="heroStats">
+      <div class="hero-row-top">
+        <span class="hero-period">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15.5 14"></polyline></svg>
+          This week
+        </span>
+        <span class="hero-badge" id="heroTodayBadge">+0 today</span>
+      </div>
+      <div class="hero-count" id="heroCount">0 saved</div>
+      <div class="hero-sparkline" id="heroSparkline" aria-hidden="true"></div>
+      <div class="hero-storage" id="heroStorage">0 KB used</div>
+    </div>
+
+    <div class="search-row">
+      <input id="search" type="search" placeholder="Search saved links, notes, tags…" autocomplete="off" />
+    </div>
+
+    <div class="quick-actions">
+      <button id="btnSaveCurrent" class="btn btn-primary btn-block" title="Save the active tab right now">
+        <span class="ic">＋</span> Save current tab
+      </button>
+      <div class="quick-actions-row">
+        <button id="btnSaveCurrentClose" class="btn btn-ghost" title="Save the active tab and close it to free memory">
+          Save &amp; close
+        </button>
+        <button id="btnAddManual" class="btn btn-ghost" title="Add any link manually">Add link</button>
+        <button id="btnBulkSave" class="btn btn-ghost" title="Save several open tabs at once, freeing up RAM">
+          Save all
+        </button>
+      </div>
+    </div>
+
+    <div class="segmented" role="tablist">
+      <button class="seg-btn active" type="button" data-view="all" role="tab" aria-selected="true">All items</button>
+      <button class="seg-btn" type="button" data-view="pinned" role="tab" aria-selected="false">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15 8.5 22 9.5 17 14.5 18.5 21.5 12 18 5.5 21.5 7 14.5 2 9.5 9 8.5 12 2"></polygon></svg>
+        Pinned
+      </button>
+    </div>
+
+    <div class="subfilter-row">
+      <select id="filterFolder" title="Filter by folder">
+        <option value="">All folders</option>
+      </select>
+      <select id="sortBy" title="Sort order">
+        <option value="recent">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="title">Title A–Z</option>
+        <option value="site">Site A–Z</option>
+      </select>
+    </div>
+
+    <main id="list" class="list" aria-live="polite">
+      <!-- items injected here -->
+    </main>
+
+    <div id="emptyState" class="empty-state" hidden>
+      <p class="empty-title">Nothing saved yet</p>
+      <p class="empty-sub">Click <strong>Save current tab</strong>, or right-click any link and choose
+        <strong>Save this link to TabVault</strong>.</p>
+    </div>
+
+    <footer class="statusbar">
+      <span id="countLabel">0 items</span>
+    </footer>
+  </div>
+
+  <!-- Add / Edit modal -->
+  <div id="modalOverlay" class="overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <div class="modal-head-info">
+          <div id="modalIcon" class="modal-icon" hidden aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </div>
+          <div>
+            <h2 id="modalTitle">Add link</h2>
+            <p id="modalSubtitle" class="modal-subtitle" hidden>Save any page by pasting its link</p>
+          </div>
+        </div>
+        <button id="modalClose" class="icon-btn" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="field">
+          <span>URL</span>
+          <input id="fUrl" type="url" placeholder="https://example.com" required />
+        </label>
+        <label class="field">
+          <span>Name <span class="muted">(optional)</span></span>
+          <input id="fTitle" type="text" placeholder="A short, memorable name" />
+        </label>
+        <label class="field">
+          <span>Note <span class="muted">(optional)</span></span>
+          <textarea id="fNote" rows="3" placeholder="Why you saved this / what to remember…"></textarea>
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span>Tags <span class="muted">(comma separated)</span></span>
+            <input id="fTags" type="text" placeholder="research, later, recipe" />
+          </label>
+          <label class="field">
+            <span>Folder</span>
+            <select id="fFolder">
+              <option value="">No folder</option>
+            </select>
+          </label>
+        </div>
+        <div id="newFolderRow" class="folder-expand-panel" hidden>
+          <span class="folder-expand-label">Folder</span>
+          <div class="field-inline">
+            <input id="newFolderName" type="text" placeholder="Folder name" />
+            <button id="newFolderConfirm" class="btn btn-primary" type="button">Add</button>
+            <button id="newFolderCancel" class="btn btn-ghost" type="button">Cancel</button>
+          </div>
+        </div>
+        <div id="newFolderTrigger" class="field-inline">
+          <button id="fNewFolder" class="link-btn" type="button">+ New folder</button>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button id="btnDelete" class="btn btn-danger" hidden>Delete</button>
+        <div class="spacer"></div>
+        <button id="btnCancel" class="btn btn-ghost">Cancel</button>
+        <button id="btnSave" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk save modal -->
+  <div id="bulkOverlay" class="overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="bulkTitle">
+      <div class="modal-head">
+        <h2 id="bulkTitle">Save open tabs</h2>
+        <button id="bulkClose" class="icon-btn" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="bulk-toolbar">
+          <button id="bulkSelectAll" class="link-btn" type="button">Select all</button>
+          <button id="bulkSelectNone" class="link-btn" type="button">Select none</button>
+          <span class="spacer"></span>
+          <label class="checkbox-inline">
+            <input id="bulkAllWindows" type="checkbox" />
+            All windows
+          </label>
+        </div>
+        <div id="bulkList" class="bulk-list"></div>
+        <label class="field">
+          <span>Folder</span>
+          <select id="bulkFolder">
+            <option value="">No folder</option>
+          </select>
+        </label>
+        <label class="checkbox-inline">
+          <input id="bulkCloseAfter" type="checkbox" checked />
+          Close saved tabs afterward (frees up RAM — great on low-end PCs)
+        </label>
+      </div>
+      <div class="modal-foot">
+        <div class="spacer"></div>
+        <button id="bulkCancel" class="btn btn-ghost">Cancel</button>
+        <button id="bulkSave" class="btn btn-primary">Save selected</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="storage.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

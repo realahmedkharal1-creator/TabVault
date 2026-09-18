@@ -1,0 +1,6 @@
+# Temporary test scaffolding used during development (mocked chrome.* API,
+# local static server, generated harness page) — never part of the shipped
+# extension.
+chrome-mock.js
+test-harness.html
+options-test.html
