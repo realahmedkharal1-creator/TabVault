@@ -59,32 +59,62 @@ function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
-function drawIcon(size) {
-  const bgTop = [124, 92, 255]; // indigo
-  const bgBottom = [79, 70, 229];
-  const radius = size * 0.22;
+// Brand gradient (135deg coral -> pink -> violet), matching popup.css's
+// --gradient-brand exactly: #ff7a59 0%, #ff4d8d 45%, #9b5de5 100%.
+const GRADIENT_STOPS = [
+  [0, [255, 122, 89]],
+  [0.45, [255, 77, 141]],
+  [1, [155, 93, 229]],
+];
 
-  function inRoundedSquare(x, y) {
-    const cx = x + 0.5;
-    const cy = y + 0.5;
-    const left = radius, top = radius, right = size - radius, bottom = size - radius;
-    if (cx >= left && cx <= right) return true;
-    if (cy >= top && cy <= bottom) return true;
-    const corners = [
-      [left, top], [right, top], [left, bottom], [right, bottom],
-    ];
-    for (const [ccx, ccy] of corners) {
-      if (Math.hypot(cx - ccx, cy - ccy) <= radius) return true;
+function gradientColor(t) {
+  t = Math.max(0, Math.min(1, t));
+  for (let i = 0; i < GRADIENT_STOPS.length - 1; i++) {
+    const [t0, c0] = GRADIENT_STOPS[i];
+    const [t1, c1] = GRADIENT_STOPS[i + 1];
+    if (t >= t0 && t <= t1) {
+      const localT = (t - t0) / (t1 - t0);
+      return [
+        Math.round(lerp(c0[0], c1[0], localT)),
+        Math.round(lerp(c0[1], c1[1], localT)),
+        Math.round(lerp(c0[2], c1[2], localT)),
+      ];
     }
-    return false;
   }
+  return GRADIENT_STOPS[GRADIENT_STOPS.length - 1][1];
+}
+
+function inRoundedRect(cx, cy, left, top, right, bottom, radius) {
+  if (cx >= left && cx <= right) return cy >= top - radius && cy <= bottom + radius;
+  if (cy >= top && cy <= bottom) return cx >= left - radius && cx <= right + radius;
+  const corners = [
+    [left, top], [right, top], [left, bottom], [right, bottom],
+  ];
+  for (const [ccx, ccy] of corners) {
+    if (Math.hypot(cx - ccx, cy - ccy) <= radius) return true;
+  }
+  return false;
+}
+
+function drawIcon(size) {
+  const outerRadius = size * 0.22;
+
+  // A translucent "glass" card sits behind the bookmark, echoing the promo
+  // tile's frosted-glass tab look instead of a flat icon on a flat gradient.
+  const glassMargin = size * 0.19;
+  const glassLeft = glassMargin;
+  const glassTop = glassMargin;
+  const glassRight = size - glassMargin;
+  const glassBottom = size - glassMargin;
+  const glassRadius = (glassRight - glassLeft) * 0.28;
+  const glassAlpha = 0.24;
 
   // Bookmark/link glyph geometry (in unit square 0..1)
   function bookmarkCoverage(x, y) {
     const u = (x + 0.5) / size;
     const v = (y + 0.5) / size;
-    const bx0 = 0.32, bx1 = 0.68;
-    const by0 = 0.22, by1 = 0.8;
+    const bx0 = 0.34, bx1 = 0.66;
+    const by0 = 0.3, by1 = 0.74;
     if (u < bx0 || u > bx1 || v < by0 || v > by1) return 0;
     const notchStart = by1 - (bx1 - bx0) * 0.55;
     if (v < notchStart) return 1;
@@ -97,13 +127,22 @@ function drawIcon(size) {
   }
 
   return (x, y) => {
-    if (!inRoundedSquare(x, y)) return [0, 0, 0, 0];
-    const t = y / size;
-    const r = Math.round(lerp(bgTop[0], bgBottom[0], t));
-    const g = Math.round(lerp(bgTop[1], bgBottom[1], t));
-    const b = Math.round(lerp(bgTop[2], bgBottom[2], t));
-    const glyph = bookmarkCoverage(x, y);
-    if (glyph) return [255, 255, 255, 255];
+    const cx = x + 0.5;
+    const cy = y + 0.5;
+    if (!inRoundedRect(cx, cy, outerRadius, outerRadius, size - outerRadius, size - outerRadius, outerRadius)) {
+      return [0, 0, 0, 0];
+    }
+
+    const t = (cx + cy) / (2 * size); // 135deg diagonal gradient
+    let [r, g, b] = gradientColor(t);
+
+    if (inRoundedRect(cx, cy, glassLeft, glassTop, glassRight, glassBottom, glassRadius)) {
+      r = Math.round(lerp(r, 255, glassAlpha));
+      g = Math.round(lerp(g, 255, glassAlpha));
+      b = Math.round(lerp(b, 255, glassAlpha));
+    }
+
+    if (bookmarkCoverage(x, y)) return [255, 255, 255, 255];
     return [r, g, b, 255];
   };
 }
