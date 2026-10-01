@@ -80,16 +80,6 @@ function inRoundedRect(cx, cy, left, top, right, bottom, radius) {
 function drawIcon(size) {
   const outerRadius = size * 0.22;
 
-  // A translucent "glass" card sits behind the bookmark, echoing the promo
-  // tile's frosted-glass tab look instead of a flat icon on a flat gradient.
-  const glassMargin = size * 0.19;
-  const glassLeft = glassMargin;
-  const glassTop = glassMargin;
-  const glassRight = size - glassMargin;
-  const glassBottom = size - glassMargin;
-  const glassRadius = (glassRight - glassLeft) * 0.28;
-  const glassAlpha = 0.24;
-
   // Bookmark/link glyph geometry (in unit square 0..1)
   function bookmarkCoverage(x, y) {
     const u = (x + 0.5) / size;
@@ -114,16 +104,8 @@ function drawIcon(size) {
       return [0, 0, 0, 0];
     }
 
-    let [r, g, b] = ICON_COLOR;
-
-    if (inRoundedRect(cx, cy, glassLeft, glassTop, glassRight, glassBottom, glassRadius)) {
-      r = Math.round(lerp(r, 255, glassAlpha));
-      g = Math.round(lerp(g, 255, glassAlpha));
-      b = Math.round(lerp(b, 255, glassAlpha));
-    }
-
     if (bookmarkCoverage(x, y)) return [255, 255, 255, 255];
-    return [r, g, b, 255];
+    return [ICON_COLOR[0], ICON_COLOR[1], ICON_COLOR[2], 255];
   };
 }
 
