@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "TabVault – Lite Link & Tab Saver",
   "version": "1.0.0",
-  "description": "Save links, tabs and whole browsing sessions with a name and a note, then close the tabs to free up RAM. Built to be fast on low-end PCs and small screens.",
+  "description": "Save links, tabs, or whole sessions with a name and note, then close tabs to free RAM. Built for low-end PCs.",
   "minimum_chrome_version": "102",
   "permissions": ["storage", "tabs", "contextMenus", "notifications", "favicon"],
   "action": {

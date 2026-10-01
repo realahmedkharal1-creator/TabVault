@@ -4,3 +4,7 @@
 chrome-mock.js
 test-harness.html
 options-test.html
+
+# Local workspace for generating store-listing marketing assets (zip,
+# screenshots, promo tiles) — build output, not extension source.
+store-assets/
