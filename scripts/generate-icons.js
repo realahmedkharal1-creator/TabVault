@@ -59,30 +59,11 @@ function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
-// Brand gradient (135deg coral -> pink -> violet), matching popup.css's
-// --gradient-brand exactly: #ff7a59 0%, #ff4d8d 45%, #9b5de5 100%.
-const GRADIENT_STOPS = [
-  [0, [255, 122, 89]],
-  [0.45, [255, 77, 141]],
-  [1, [155, 93, 229]],
-];
-
-function gradientColor(t) {
-  t = Math.max(0, Math.min(1, t));
-  for (let i = 0; i < GRADIENT_STOPS.length - 1; i++) {
-    const [t0, c0] = GRADIENT_STOPS[i];
-    const [t1, c1] = GRADIENT_STOPS[i + 1];
-    if (t >= t0 && t <= t1) {
-      const localT = (t - t0) / (t1 - t0);
-      return [
-        Math.round(lerp(c0[0], c1[0], localT)),
-        Math.round(lerp(c0[1], c1[1], localT)),
-        Math.round(lerp(c0[2], c1[2], localT)),
-      ];
-    }
-  }
-  return GRADIENT_STOPS[GRADIENT_STOPS.length - 1][1];
-}
+// A single solid brand color (the gradient's vibrant mid-tone) instead of
+// the diagonal coral-to-violet gradient — at small icon sizes a gradient
+// reads as two clashing colors on opposite corners rather than a smooth
+// blend, so the toolbar icon stays one consistent, recognizable color.
+const ICON_COLOR = [255, 77, 141]; // #ff4d8d
 
 function inRoundedRect(cx, cy, left, top, right, bottom, radius) {
   if (cx >= left && cx <= right) return cy >= top - radius && cy <= bottom + radius;
@@ -133,8 +114,7 @@ function drawIcon(size) {
       return [0, 0, 0, 0];
     }
 
-    const t = (cx + cy) / (2 * size); // 135deg diagonal gradient
-    let [r, g, b] = gradientColor(t);
+    let [r, g, b] = ICON_COLOR;
 
     if (inRoundedRect(cx, cy, glassLeft, glassTop, glassRight, glassBottom, glassRadius)) {
       r = Math.round(lerp(r, 255, glassAlpha));
